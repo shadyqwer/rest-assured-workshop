@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.*;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.specification.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,11 @@ import org.junit.jupiter.api.Test;
 public class RestAssuredExercises1Test {
 
 	private RequestSpecification requestSpec;
+	private String customerID = "12212";
 
 	@BeforeEach
 	public void createRequestSpecification() {
-
+		customerID = "12212";
 		requestSpec = new RequestSpecBuilder().
 				setBaseUri("http://localhost").
 				setPort(9876).
@@ -34,7 +36,11 @@ public class RestAssuredExercises1Test {
 		given().
 			spec(requestSpec).
 		when().
-		then();
+			get("/customer/12212").
+		then().
+			log().all().
+			assertThat().
+			statusCode(200);
 	}
 
 	/*******************************************************
@@ -48,7 +54,11 @@ public class RestAssuredExercises1Test {
 		given().
 			spec(requestSpec).
 		when().
-		then();
+			get("/customer/99999").
+		then().
+			log().all().
+			assertThat().
+			statusCode(404);
 	}
 
 	/*******************************************************
@@ -62,7 +72,10 @@ public class RestAssuredExercises1Test {
 		given().
 			spec(requestSpec).
 		when().
-		then();
+			get("/customer/12212").
+		then().
+			assertThat().
+			contentType(ContentType.JSON);
 	}
 
 	/***********************************************
@@ -80,7 +93,10 @@ public class RestAssuredExercises1Test {
 		given().
 			spec(requestSpec).
 		when().
-		then();
+			get("/customer/12212").
+		then().
+			assertThat().
+			body("firstName", equalTo("John"));
 	}
 
 	/***********************************************
@@ -97,8 +113,14 @@ public class RestAssuredExercises1Test {
 
 		given().
 			spec(requestSpec).
+			pathParams("customerID", customerID).
 		when().
-		then();
+			get("/customer/{customerID}").
+		then().
+			log().all().
+			assertThat().
+			statusCode(200).
+			body("address.city", equalTo("Beverly Hills"));
 	}
 
 	/***********************************************
@@ -115,8 +137,13 @@ public class RestAssuredExercises1Test {
 
 		given().
 			spec(requestSpec).
+			pathParams("customerID", customerID).
 		when().
-		then();
+			get("/customer/{customerID}/accounts").
+		then().
+			log().all().
+			assertThat().
+			body("accounts.id", hasItem(12345));
 	}
 
 	/***********************************************
@@ -133,8 +160,12 @@ public class RestAssuredExercises1Test {
 
 		given().
 			spec(requestSpec).
+			pathParams("customerID", customerID).
 		when().
-		then();
+			get("/customer/{customerID}/accounts").
+		then().
+			assertThat().
+			body("accounts.id", not(hasItem(99999)));
 	}
 
 	/***********************************************
@@ -151,7 +182,11 @@ public class RestAssuredExercises1Test {
 
 		given().
 			spec(requestSpec).
+			pathParams("customerID", customerID).
 		when().
-		then();
+			get("/customer/{customerID}/accounts").
+		then().
+			assertThat().
+			body("accounts.id", hasSize(3));
 	}
 }
