@@ -6,6 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static io.restassured.RestAssured.given;
@@ -46,6 +47,42 @@ public class RestAssuredExercises2Test {
      * Use the GPath expressions "firstName" and "lastName",
      * respectively, to extract the required response body elements
      ******************************************************/
+
+    @ParameterizedTest
+    @CsvSource({
+            "12212,John,Smith",
+            "12323,Susan,Holmes",
+            "14545,Anna,Grant"
+    })
+    void requestDataForCustomers_checkNames(String customerID, String firstName, String lastName) {
+
+        given().
+            spec(requestSpec).
+            pathParams("customerID", customerID).
+        when().
+            get("/customer/{customerID}").
+        then().
+            log().all().
+            assertThat().
+            body("firstName", equalTo(firstName)).
+            body("lastName", equalTo(lastName));
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/exerciseFiles/exercise2.csv", numLinesToSkip = 1)
+    void requestDataForCustomers_checkNamesFromCSV(String customerID, String firstName, String lastName) {
+
+        given().
+                spec(requestSpec).
+                pathParams("customerID", customerID).
+                when().
+                get("/customer/{customerID}").
+                then().
+                log().all().
+                assertThat().
+                body("firstName", equalTo(firstName)).
+                body("lastName", equalTo(lastName));
+    }
 
     @Test
     public void requestDataForCustomer12212_checkNames_expectJohnSmith() {
