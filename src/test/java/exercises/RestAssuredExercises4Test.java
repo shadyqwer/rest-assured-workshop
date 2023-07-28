@@ -30,7 +30,7 @@ public class RestAssuredExercises4Test {
      *
      * Assert that the ID of the first account equals 12345
      * What do you notice about comparing integer element values?
-     *
+     * - XML treats all data as text(strings) by default
      * Use "accounts.account[0].id" as the XmlPath
      * expression to extract the required value from the response
      ******************************************************/
@@ -41,7 +41,12 @@ public class RestAssuredExercises4Test {
         given().
             spec(requestSpec).
         when().
-        then();
+            get("/xml/customer/12212/accounts").
+        then().
+            log().all().
+            assertThat().
+            body("accounts.account[0].id", equalTo("12345")).
+            body("accounts.account[0].balance", equalTo("1234.56"));
     }
 
     /*******************************************************
@@ -62,7 +67,10 @@ public class RestAssuredExercises4Test {
         given().
             spec(requestSpec).
         when().
-        then();
+            get("/xml/customer/12212/accounts").
+        then().
+            assertThat().
+            body("accounts.account[2].balance", equalTo("43.21"));
     }
 
     /*******************************************************
@@ -82,7 +90,10 @@ public class RestAssuredExercises4Test {
         given().
             spec(requestSpec).
         when().
-        then();
+            get("/xml/customer/12212/accounts").
+        then().
+            assertThat().
+            body("accounts.account.findAll{it.type=='checking'}.size()", equalTo(3));
     }
 
 
@@ -104,6 +115,9 @@ public class RestAssuredExercises4Test {
         given().
             spec(requestSpec).
         when().
-        then();
+            get("/xml/customer/12212/accounts").
+        then().
+            assertThat().
+            body("accounts.account.id.grep(~/5.*/).size()", equalTo(2));
     }
 }
