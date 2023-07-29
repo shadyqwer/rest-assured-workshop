@@ -2,8 +2,9 @@ package exercises;
 
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dataentities.Account;
+import dataentities.AccountResponse;
+import dataentities.Customer;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
@@ -48,10 +49,17 @@ public class RestAssuredExercises5Test {
     @Test
     public void postAccountObject_checkResponseHttpStatusCode_expect201() {
 
+        Account account = new Account("savings");
+
         given().
             spec(requestSpec).
+            body(account).
         when().
-        then();
+            post("/customer/12212/accounts").
+        then().
+            log().all().
+            assertThat().
+            statusCode(201);
     }
 
     /*******************************************************
@@ -67,9 +75,20 @@ public class RestAssuredExercises5Test {
     @Test
     public void getAccountsForCustomer12212_deserializeIntoList_checkListSize_shouldEqual3() {
 
+        AccountResponse accountResponse =
         given().
             spec(requestSpec).
-        when();
+        when().
+            get("/customer/12212/accounts").
+        then().
+            log().all().
+            statusCode(200).
+        and().
+            extract().
+            body().
+            as(AccountResponse.class);
+
+        assertEquals(3, accountResponse.getAccounts().size());
     }
 
     /*******************************************************
@@ -89,9 +108,24 @@ public class RestAssuredExercises5Test {
 
     @Test
     public void postCustomerObject_checkReturnedFirstAndLastName_expectSuppliedValues() {
+        String firstName = "Milos";
+        String lastName = "QWER";
+        Customer postCustomer = new Customer(firstName, lastName);
 
+        Customer getCustomer =
         given().
             spec(requestSpec).
-        when();
+            body(postCustomer).
+        when().
+            post("/customer").
+        then().
+            statusCode(201).
+        and().
+            extract().
+            body().
+            as(Customer.class);
+
+        assertEquals(firstName, getCustomer.getFirstName());
+        assertEquals(lastName, getCustomer.getLastName());
     }
 }
